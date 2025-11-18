@@ -49,7 +49,7 @@ function LoginBox() {
           </div>
 
           <p className={styles.signup}>
-            회원이신가요? <Link to="/signin">회원가입</Link>
+            회원이신가요? <Link to="/signup">회원가입</Link>
           </p>
 
           <Link to="/findlog" className={styles.changelog}>
