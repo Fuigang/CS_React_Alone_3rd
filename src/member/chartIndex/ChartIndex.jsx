@@ -9,7 +9,7 @@ import { FETAL_STANDARDS } from "./FetalStandardData";
 const ChartIndex = () => {
   // 상단 메뉴튼버튼
   const menuList = [
-    "전체",
+    "성장",
     "몸무게",
     "머리직경",
     "머리둘레",
