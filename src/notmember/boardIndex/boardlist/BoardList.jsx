@@ -1,78 +1,195 @@
-import { useEffect, useState } from "react";
-import { caxios } from "../../../config/config";
+import React, { useState } from "react";
+import {
+  MoreHorizontal,
+  Eye,
+  MessageCircle,
+  ChevronsLeft,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsRight,
+  Search,
+} from "lucide-react"; // 아이콘 정리
+import styles from "./BoardList.module.css";
 
+// 서버에서 받아올 데이터 예시
+const MOCK_DATA = [
+  {
+    id: 1,
+    category: "질문",
+    title: "2024년 부모급여 인상, 무엇이 달라지나?",
+    description:
+      "올해부터 0세 아동 가정에 월 100만원이 지급됩니다. 신청 방법과 지급 시기를 상세하게 정리해 드려요.",
+    views: 1240,
+    comments: 45,
+    imageUrl:
+      "https://cdn.billyapi.com/posts-seo/Image-seo-pregnant%20woman%20room-Korea.jpg",
+  },
+  {
+    id: 2,
+    category: "후기",
+    title: "국민행복카드 바우처 알뜰하게 쓰는 꿀팁",
+    description:
+      "임신 출산 진료비 지원금, 어디서 쓰면 제일 좋을까요? 조리원부터 약국까지 사용처 총정리!",
+    views: 85,
+    comments: 12,
+    imageUrl: "",
+  },
+  {
+    id: 3,
+    category: "질문",
+    title: "32주차인데 가진통이랑 진진통 구분이 어려워요 ㅠㅠ",
+    description:
+      "배가 뭉치는 느낌이 계속 드는데 병원을 가야 할까요? 선배맘들의 조언 부탁드려요.",
+    views: 342,
+    comments: 28,
+    imageUrl: "",
+  },
+  {
+    id: 4,
+    category: "무료나눔",
+    title: "아기 침대랑 모빌 나눔합니다 (상태 A급)",
+    description:
+      "6개월 정도 깨끗하게 썼어요. 부피가 커서 직접 가져가실 분만 연락 주세요. 지역은 서울입니다.",
+    views: 56,
+    comments: 3,
+    imageUrl: "",
+  },
+  {
+    id: 5,
+    category: "질문",
+    title: "서울시 임산부 교통비 지원 신청하세요",
+    description:
+      "70만원 상당의 교통 포인트 지급! 지하철, 버스, 택시, 자차 유류비까지 사용 가능합니다.",
+    views: 890,
+    comments: 55,
+    imageUrl:
+      "https://via.placeholder.com/300x200/D8BFD8/ffffff?text=Transport",
+  },
+];
 
-//보드리스트
-const BoardList=()=>{
-//0. 상태변수
-const [typeBtn, setTypeBtn] =useState();//어떤 버튼 눌렸는지에 대한 상태변수
-const [cpage, setCpage] =useState(); //현재 몇페이지인지에 대한 상태변수
-const [thumbsUrlMap, setThumbsUrlMap] = useState({}); //썸네일 url 모아둘 맵 키: 보드시퀀스- 밸류 :blobURL
-const [mergedList, setMergedList] = useState([]); // 보드랑 파일이랑 엮어둔 맵
+const CATEGORIES = ["전체", "후기", "무료나눔", "질문"];
 
-const board_type ="qna";
+const BoardList = () => {
+  const [activeCategory, setActiveCategory] = useState("전체");
 
+  // 카드 클릭 시 이동 함수
+  const handleCardClick = (id) => {
+    console.log(`${id}번 게시글로 이동!`);
+  };
 
-// 1.필터랑 페이지 수에 맞게 가져오기
-useEffect(() => {
-  Object.values(thumbsUrlMap).forEach(url => URL.revokeObjectURL(url))
+  // 메뉴 버튼 클릭 시 카드 클릭 이벤트 막기
+  const handleMenuClick = (e) => {
+    e.stopPropagation(); // 이벤트 전파 방지
+    console.log("메뉴 열기");
+  };
 
-  async function loadList() {
-    const resp = await caxios.get("/board", { //resp.data 에 1) boards가 있고 List<BoardDTO> 2) thumbs가 있을 예정 List<FileDTO>
-      params: { board_type, cpage }
-    }); 
-    console.log(resp)
-    //1) 썸네일은 맵으로 변경시키기
-    const thumbsMap = new Map(); 
-    resp.data.thumbs.forEach(t => {
-      thumbsMap.set(t.target_seq, t);
-    });
+  return (
+    <div className={styles.container}>
+      {/* 상단 필터 및 검색 영역 */}
+      <div className={styles.header}>
+        <div className={styles.categoryList}>
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              className={`${styles.categoryItem} ${
+                activeCategory === cat ? styles.active : ""
+              }`}
+              onClick={() => setActiveCategory(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
 
-    // 2) 보드랑 붙이기 (보드시퀀스가진 맵찾아서 객체의 밸류로 넣고 아니면 null)
-    const merged = resp.data.boards.map(b => ({
-      board: b,
-      thumb: thumbsMap.get(b.board_seq) || null
-    }));
+        <div className={styles.searchBar}>
+          <input
+            type="text"
+            placeholder="제목을 입력하세요"
+            className={styles.searchInput}
+          />
+          <Search className={styles.searchIcon} size={24} />
+        </div>
+      </div>
 
-    setMergedList(merged);
+      {/* 게시글 카드 그리드 */}
+      <div className={styles.cardGrid}>
+        <ul className={styles.gridContainer}>
+          {MOCK_DATA.map((item) => (
+            <li
+              key={item.id}
+              className={styles.card}
+              onClick={() => handleCardClick(item.id)} // 카드 전체 클릭 이벤트
+            >
+              {/* 카드 상단 이미지 영역 */}
+              <div className={styles.cardHeader}>
+                <img
+                  src={item.imageUrl}
+                  alt={item.title}
+                  className={styles.cardImage}
+                />
 
-    // 3) 시스네임 기반으로 blobURL에대한 맵 생성하기
-    const urls = {};
-    for (const item of merged) {
-      if (item.thumb) {
-        const blobUrl = await getThumbUrl(item.thumb.sysname);
-        urls[item.board.board_seq] = blobUrl;
-      }
-    }
+                {/* 오버레이 메뉴 버튼 */}
+                <button
+                  className={styles.menuBtn}
+                  aria-label="옵션 더보기"
+                  onClick={handleMenuClick} // 이벤트 전파 방지 적용
+                >
+                  <MoreHorizontal size={24} color="#696b70" />
+                </button>
+              </div>
 
-    setThumbsUrlMap(urls);
-  }
+              {/* 텍스트 내용 */}
+              <div className={styles.content}>
+                <div className={styles.textGroup}>
+                  {" "}
+                  {/* 텍스트 그룹핑 */}
+                  <span
+                    className={`${styles.categoryTag} ${styles[item.category]}`}
+                  >
+                    {item.category}
+                  </span>
+                  <h3 className={styles.title}>{item.title}</h3>
+                  <p className={styles.description}>{item.description}</p>
+                </div>
 
-  loadList();
-}, [board_type, cpage]); // 페이지나 버튼이 바뀌면 해당 데이터에 맞는 내용을 다시 가져와야함
+                <div className={styles.stats}>
+                  <div className={styles.statItem}>
+                    <Eye size={16} />
+                    <span>{item.views}</span>
+                  </div>
+                  <div className={styles.statItem}>
+                    <MessageCircle size={16} />
+                    <span>{item.comments}</span>
+                  </div>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
 
-
-//2. 시스네임 기반으로 blob URL 생성하기 함수
-async function getThumbUrl(sysname){
-    const resp = await caxios.get("/file/download", {
-    params :{sysname} , responseType : "blob"  
-    })
-    return URL.createObjectURL(resp.data)
-}
-
-
-
-
-
-
-
-return(
-    <div>
-        여기에 필터 버튼 있을 예정
-        보드리스트
+      {/* 페이지네이션 */}
+      <div className={styles.pagination}>
+        <button className={styles.pageControl} disabled>
+          <ChevronsLeft size={20} />
+          <ChevronLeft size={20} />
+        </button>
+        <div className={styles.pageNumbers}>
+          <button className={`${styles.pageBtn} ${styles.activePage}`}>
+            1
+          </button>
+          <button className={styles.pageBtn}>2</button>
+          <button className={styles.pageBtn}>3</button>
+          <button className={styles.pageBtn}>4</button>
+          <button className={styles.pageBtn}>5</button>
+        </div>
+        <button className={styles.pageControl}>
+          <ChevronRight size={20} />
+          <ChevronsRight size={20} />
+        </button>
+      </div>
     </div>
-);
+  );
+};
 
-
-}
 export default BoardList;
