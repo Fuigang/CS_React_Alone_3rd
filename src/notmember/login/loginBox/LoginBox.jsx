@@ -33,7 +33,7 @@ function LoginBox() {
             </div>
             <div className={styles.middletwo}>
               <label htmlFor="ppw">비밀번호</label> 
-              <input type="text" id="ppw" placeholder="비밀번호" ></input>  
+              <input type="password" id="ppw" placeholder="비밀번호" ></input>  
             </div>
           </div>
 
