@@ -6,7 +6,7 @@ import { calculateFetalWeek, calculateInfantWeek } from "../utils/pregnancyUtils
 //  MOCK_...으로 시작하는 모든 변수 정의는 제거되었습니다.
 
 
-export const useChartIndex = () => {
+export const useChartIndex = (babySeq) => {
     
     
     // 1. 상태 초기화 (API 응답을 기다리는 null 상태)
@@ -19,8 +19,8 @@ export const useChartIndex = () => {
         "전체", "몸무게", "머리직경", "머리둘레", "복부둘레", "허벅지 길이",
     ];
     
-    //  참고: DUMMY_BABY_SEQ는 인증 구현 전까지 API 호출의 시작점이므로 유지합니다.
-    const DUMMY_BABY_SEQ = 1; 
+
+    
 
 
     // 3. PHASE 1: 초기 데이터 로드 및 currentWeek 계산 (EDD/Status -> Week)
@@ -28,7 +28,7 @@ export const useChartIndex = () => {
         const fetchInitialState = async () => {
             try {
                 // Baby 정보 조회
-                const babyResponse = await caxios.get(`/baby/${DUMMY_BABY_SEQ}`);
+                const babyResponse = await caxios.get(`/chart/${babySeq}`);
                 const { status, birthDate, baby_seq } = babyResponse.data;
 
                // 서버 API 호출 대신, 클라이언트 유틸리티를 사용해 주차 계산
@@ -50,7 +50,7 @@ export const useChartIndex = () => {
             } catch (error) {
                 console.error("초기 데이터 로딩 오류:", error);
                 setCurrentWeek(28); // 오류 시 기본값 설정
-                setBabyInfo({ babySeq: DUMMY_BABY_SEQ, status: 'FETUS', birthDate: '2026-01-01' }); 
+                setBabyInfo({ baby_seq: babySeq, status: 'FETUS', birth_date: '2026-01-01' }); 
             }
         };
         
