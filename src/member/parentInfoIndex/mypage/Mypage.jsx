@@ -4,7 +4,7 @@ import useMypage from "./useMypage";
 const Mypage = () => {
   const [isEditing, setIsEditing] = useState(false); // 수정 상태변수
 
-  const {data} =useMypage();
+  const {data} =useMypage(isEditing);
 
   return (
     <div className={styles.container}>
@@ -14,19 +14,20 @@ const Mypage = () => {
           <div className={styles.main}>
             {/* 아이디 */}
             <p className={styles.id}>아이디</p>
-            <div className={styles.dbid}>DB에서 가져올 ID값</div>
+            <div className={styles.dbid}>{data.user_id}</div>
 
             {/* 닉네임 */}
             <div className={styles.nick}>
               <label htmlFor="nic">닉네임</label>
               {isEditing ? (
-                <input
+                <input  
                   type="text"
                   id="nic"
+                  value={data.nickname}
                   className={styles.editableInput}
                 />
               ) : (
-                <div className={styles.dbValue}>맘마미아</div>
+                <div className={styles.dbValue}>{data.nickname}</div>
               )}
             </div>
 
@@ -37,16 +38,17 @@ const Mypage = () => {
                 <input
                   type="email"
                   id="email"
+                  value={data.email}
                   className={styles.editableInput}
                 />
               ) : (
-                <div className={styles.dbValue}>mosque@gmail.com</div>
+                <div className={styles.dbValue}>{data.email}</div>
               )}
             </div>
 
             {/* 생일 */}
             <p className={styles.birthday}>생일</p>
-            <div className={styles.dbbirth}>♥ DB에서 가져올 생일 ♥</div>
+            <div className={styles.dbbirth}>{data.birth_date}</div>
 
             {/* 전화번호 */}
 <div className={styles.phone}>
@@ -65,22 +67,22 @@ const Mypage = () => {
         <input
           id="phone1"
           type="tel"
-          placeholder="연락처"
+          value={data.phone1}
           className={styles.editableInput}
         />
         <span className={styles.dash}>-</span>
         <input
           id="phone2"
           type="tel"
-          placeholder="연락처"
+          value={data.phone2}
           className={styles.editableInput}
         />
       </>
     ) : (
       <>
-        <div className={styles.dbValue} style={{ height: "48px", lineHeight: "48px" }}>1234</div>
+        <div className={styles.dbValue} style={{ height: "48px", lineHeight: "48px" }}>{data.phone1}</div>
         <span className={styles.dash}>-</span>
-        <div className={styles.dbValue} style={{ height: "48px", lineHeight: "48px" }}>5678</div>
+        <div className={styles.dbValue} style={{ height: "48px", lineHeight: "48px" }}>{data.phone2}</div>
       </>
     )}
   </div>
@@ -91,7 +93,7 @@ const Mypage = () => {
 
         <div className={styles.fabt}>
           <p className={styles.familycode}>가족코드</p>
-          <div className={styles.familywhy}>뭐가 오겠지 뭐</div>
+          <div className={styles.familywhy}>{data.family_code}</div>
 
           <div className={styles.btwo}>
             {isEditing ? (
