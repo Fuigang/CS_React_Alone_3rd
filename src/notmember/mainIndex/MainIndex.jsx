@@ -58,8 +58,6 @@ const MainIndex = () => {
           <Route path="" element={!isLogin ? <Information /> : <BabyIndex />} />
           {/*로그인 안되어 있으면 ? 인포메이션 : 되면 베이비인덱스*/}
           <Route path="board/*" element={<BoardIndex />} /> {/*커뮤니티*/}
-          {/* 어떻게 만들어지는지 볼려고 만든거라 삭제 가능... 내가 보낼때 까먹으면 그냥 삭제해보려.. */}
-          <Route path="babyIndex/*" element={<BabyIndex />} />
           {/*-----------------------------------------------------------------------여기까지는 비회원도 접근 가능한 부분 아래는 불가하게 막아야함*/}
           <Route path="mypage" element={<ParentInfoIndex />} /> {/*회원가입*/}
           <Route path="babymypage" element={<BabyInfoIndex />} />
