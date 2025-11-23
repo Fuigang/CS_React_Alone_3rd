@@ -1,10 +1,14 @@
 import { create } from "zustand";
 
+// 1. 🚨 sessionStorage에서 babySeq를 읽어옵니다. (필수)
+const storedBabySeq = sessionStorage.getItem("babySeq");
+const initialBabySeq = storedBabySeq ? Number(storedBabySeq) : 1;
+
 const useAuthStore = create((set) => ({
   token: "",
   id: "",
   isLogin: false,
-  babySeq : 1,
+  babySeq : initialBabySeq,
 
   getbabySeq : (seq)=>{
     set((state)=>{

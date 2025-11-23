@@ -12,6 +12,12 @@ import useAuthStore from "../../store/useStore";
 const ChartIndex = () => {
 
   const babySeqFromStore = useAuthStore(state => state.babySeq);
+
+
+  console.log("FINAL DEBUG: babySeq from Store:", babySeqFromStore);
+
+
+  
   // 2.  Hook을 호출하여 모든 상태와 데이터를 가져옵니다.
   const {
     menuList,
@@ -22,7 +28,11 @@ const ChartIndex = () => {
     currentActualData: actualData,
   } = useChartIndex(babySeqFromStore);
 
-
+console.log('--- Loading State Check (Loop) ---');
+console.log('1. currentWeek:', currentWeek);
+console.log('2. actualData:', actualData);
+console.log('3. currentStandardData:', currentStandardData);
+console.log('Loading Condition Result:', currentWeek === 0 || actualData === null || !currentStandardData);
 
 
   // 3.  로딩 상태 처리

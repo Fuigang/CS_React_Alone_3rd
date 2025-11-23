@@ -2,7 +2,7 @@
     import { useNavigate } from "react-router-dom";
     import { caxios } from "../../config/config";
     import { FETAL_STANDARDS } from "./FetalStandardData"; 
-    import { calculateFetalWeek, calculateInfantWeek, fetalWeekStartEnd } from "../utils/pregnancyUtils";
+    import { calculateFetalWeek, calculateInfantWeek, fetalWeekStartEnd, infantWeekStartEnd } from "../utils/pregnancyUtils";
 
 
 
@@ -75,24 +75,46 @@
             if (currentWeek <= 0 || !babyInfo) return; 
 
             const fetchActualData = async () => {
-                setActualData(null); 
+                
                 try {
-                    //  DB 쿼리용 시작일/종료일 계산 (클라이언트의 역할)
-                    const [startDate, endDate] = fetalWeekStartEnd(babyInfo.birth_date, currentWeek);
-
-                    const response = await caxios.get(`/chart/total`, {
-                        params: { babyId: babyInfo.babySeq, 
-                            week : currentWeek,
-                            startDate: startDate, 
-                            endDate: endDate }
-                    });
-                    setActualData(response.data || {}); 
-                } catch (error) {
-                    console.error("Actual Data 조회 실패:", error);
-                    setActualData({});
+                let startDate, endDate;
+                
+                // 🚨 Final Fix: status에 따라 다른 날짜 범위 계산 유틸리티 사용
+                if (babyInfo.status.toLowerCase() === 'fetus') {
+                    // 1. 태아: EDD를 기준으로 주차 시작/종료일 계산
+                    [startDate, endDate] = fetalWeekStartEnd(babyInfo.birthDate, currentWeek);
+                } else {
+                    // 2. 영유아: 생일을 기준으로 생후 주차 시작/종료일 계산
+                    // 💡 infantWeekStartEnd 함수는 현재 주차(week)를 기반으로 해당 주차의 날짜 범위를 반환해야 합니다.
+                    [startDate, endDate] = infantWeekStartEnd(babyInfo.birthDate, currentWeek); 
                 }
-            };
+
+                // 🚨 날짜가 null인지 최종 체크 (유효하지 않은 날짜는 전송 금지)
+                if (!startDate || !endDate) {
+                    console.error("DEBUG: Calculated date range is invalid. Aborting API call.");
+                    setActualData({});
+                    return;
+                }
+                
+                // 3. API 호출 (유효한 날짜 전송)
+                const response = await caxios.get(`/chart/total`, {
+                    params: { 
+                       babyId: babyInfo.babySeq, 
+                        week: currentWeek, // 주차 정보는 optional하게 남겨두거나 서버에 맞춰 전송합니다.
+                        startDate: startDate, 
+                        endDate: endDate
+                    }
+                });
+                setActualData(response.data || {}); 
+
+            } catch (error) {
+                console.error("Actual Data 조회 실패:", error);
+                setActualData({});
+            }
+        };
             
+
+
             fetchActualData();
         }, [currentWeek, babyInfo]); 
 
