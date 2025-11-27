@@ -343,9 +343,6 @@ export function UseBoardWrite() {
             console.log("받아온 에디터 데이터", resp)
 
 
-
-
-
             const board = resp.data.boards;
             const files = resp.data.files;
 
@@ -388,45 +385,26 @@ export function UseBoardWrite() {
 
     }, [])
 
+
+
+
     useEffect(() => {
-        if (!editorInstance || !initialContent) return;
-
-        let parsed = initialContent;
-        while (typeof parsed === "string") {
-            parsed = JSON.parse(parsed);
-        }
-
+        if (!editorInstance) return;
+        const parsed = JSON.parse(initialContent);
         editorInstance.commands.setContent(parsed);
 
-        requestAnimationFrame(() => {
-            const pm = editorInstance.view.dom;
-            const wrapper = pm.closest(".simple-editor-content");
+        // const updateHeight = () => {
+        //     requestAnimationFrame(() => {
+        //         const pm = editorInstance.view.dom;
+        //         const wrapper = pm.closest(".simple-editor-content");
+        //         if (!wrapper) return;
+        //         pm.style.minHeight = Math.max(wrapper.clientHeight, pm.scrollHeight + 50) + "px";
+        //     });
+        // };
+        // updateHeight();
 
-            if (!wrapper) return;
-
-            // ✅ 실제 내용 높이로 wrapper 동기화
-            wrapper.style.height = pm.scrollHeight + "px";
-        });
     }, [editorInstance, initialContent]);
 
-
-    // useEffect(() => {
-    //     if (!editorInstance) return;
-    //     const parsed = JSON.parse(initialContent);
-    //     editorInstance.commands.setContent(parsed);
-
-    //     const forceReflow = () => {
-    //         const dom = editorInstance.view.dom;
-
-    //         // ✅ DOM 강제 리플로우 트릭
-    //         dom.style.display = "none";
-    //         const _ = dom.offsetHeight; // // 강제로 리플로우 발생
-    //         dom.style.display = "";
-    //     };
-
-
-    //     setTimeout(forceReflow, 50);
-    // }, [editorInstance, initialContent]);
 
     // useEffect(() => {
     //     if (!editorInstance || !initialContent) return;
