@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./ChartInput.module.css";
-import { submitChartData } from "./UseChartInput"; // JS 분리
+import { submitChartData } from "./UseChartInput"; // JS 분
 import useAuthStore from "../../../store/useStore";
 
-const ChartInput = ({ menuList, activeMenu, currentWeek, existingData }) => {
+const ChartInput = ({ menuList, activeMenu, currentWeek, inputs, setInputs, actualData, measureTypes }) => {
   const activeItem = menuList[activeMenu];
   const [isEditing, setIsEditing] = useState(false);
-  const hasData = existingData?.[currentWeek] ? true : false;
 
+  const hasData = actualData && Object.keys(actualData).length > 0;
+  const isDisabled = hasData && !isEditing;
+  console.log("실제 데이터" + actualData.EFW);
   const [date, setDate] = useState("");
-  const [inputs, setInputs] = useState({});
+
   const { id, babySeq } = useAuthStore();
 
   const handleChange = (key, value) => {
@@ -17,7 +19,7 @@ const ChartInput = ({ menuList, activeMenu, currentWeek, existingData }) => {
   };
 
   const handleSubmit = async () => {
-    await submitChartData({ inputs, date, babySeq, id });
+    await submitChartData({ inputs, date, babySeq, id, measureTypes });
     // 저장 완료 후 상태 처리
     setIsEditing(false);
   };
@@ -29,6 +31,25 @@ const ChartInput = ({ menuList, activeMenu, currentWeek, existingData }) => {
   const shouldRenderSingleInput = activeItem !== "성장";
   const isWeightInput = activeItem === "몸무게";
   const todayStr = new Date().toISOString().split("T")[0];
+
+  useEffect(() => {
+    if (actualData?.measure_date) {
+      let formattedDate;
+
+      // measure_date가 Date 혹은 Timestamp 객체일 때
+      if (actualData.measure_date instanceof Date) {
+        formattedDate = actualData.measure_date.toISOString().split("T")[0];
+      } else if (typeof actualData.measure_date === "string") {
+        // 이미 문자열이면 그냥 사용, 혹은 YYYY-MM-DD 형태인지 체크
+        formattedDate = actualData.measure_date.split("T")[0]; // "2025-11-27T..." → "2025-11-27"
+      } else {
+        // 그 외 타입이면 강제로 빈 문자열
+        formattedDate = "";
+      }
+
+      setDate(formattedDate);
+    }
+  }, [actualData]);
 
   return (
     <div className={styles.sidePanel}>
@@ -57,7 +78,8 @@ const ChartInput = ({ menuList, activeMenu, currentWeek, existingData }) => {
                     <input
                       className={styles.input}
                       type="number"
-                      value={inputs[item] || ""}
+                      // value={actualData[item] ?? ""}
+                      value={inputs[item] ?? ""}
                       onChange={(e) => handleChange(item, e.target.value)}
                       placeholder={item}
                     />
@@ -67,7 +89,8 @@ const ChartInput = ({ menuList, activeMenu, currentWeek, existingData }) => {
                   <input
                     className={styles.input}
                     type="number"
-                    value={inputs[item] || ""}
+                    // value={actualData[item] ?? ""}
+                    value={inputs[item] ?? ""}
                     onChange={(e) => handleChange(item, e.target.value)}
                     placeholder={item}
                   />
@@ -85,7 +108,7 @@ const ChartInput = ({ menuList, activeMenu, currentWeek, existingData }) => {
                 <input
                   className={styles.input}
                   type="number"
-                  value={inputs[activeItem] || ""}
+                  value={inputs[activeItem] ?? ""}
                   onChange={(e) => handleChange(activeItem, e.target.value)}
                   placeholder={activeItem}
                 />
@@ -95,7 +118,7 @@ const ChartInput = ({ menuList, activeMenu, currentWeek, existingData }) => {
               <input
                 className={styles.input}
                 type="number"
-                value={inputs[activeItem] || ""}
+                value={inputs[activeItem] ?? ""}
                 onChange={(e) => handleChange(activeItem, e.target.value)}
                 placeholder={activeItem}
               />

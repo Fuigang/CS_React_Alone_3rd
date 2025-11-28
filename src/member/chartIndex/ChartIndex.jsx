@@ -10,6 +10,16 @@ import useAuthStore from "../../store/useStore";
 import { useChartIndex } from "./UseChartIndex";
 import { fetalWeekStartEnd, infantWeekStartEnd } from "../utils/pregnancyUtils";
 const ChartIndex = () => {
+  const [inputs, setInputs] = useState({});
+  const measureTypes = {
+    EFW: inputs["몸무게"],
+    OFD: inputs["머리직경"],
+    HC: inputs["머리둘레"],
+    AC: inputs["복부둘레"],
+    FL: inputs["허벅지 길이"],
+  };
+
+
   // 상단 메뉴 버튼: 임산모
   const fetalMenuList = [
     "성장",
@@ -43,7 +53,7 @@ const ChartIndex = () => {
     return null; // 육아 모드일 때는 태아 표준 데이터 는 사용하지 않음
   }, [currentWeek, isFetalMode]); // isFetalMode가 바뀔 때 useMemo 재계산
 
-  console.log(activeMenu);
+  console.log("메뉴 : " + activeMenu);
   console.log("DEBUG — currentWeek:", currentWeek);
   console.log("DEBUG — currentStandardData:", currentStandardData);
   console.log("DEBUG — actualData:", actualData);
@@ -53,46 +63,6 @@ const ChartIndex = () => {
     menuList,
   } = useChartIndex(currentWeek, setCurrentWeek);
 
-  // 데이터 조회 비동기 로직 (caxios 사용)
-  //육아 모드 시 API 엔드포인트와 파라미터(week 대신 month 등)가 달짐
-  // useEffect(() => {
-  //   // 육아 모드일 때는 다른 API를 호출하거나 이 효과 건너뜀
-  //   if (!isFetalMode) {
-  //     setActualData({}); // 육아 데이터는 다른 곳에서 가져온다고 가정
-  //     return;
-  //   }
-
-  //   const fetchCurrentData = async () => {
-  //     setActualData(null); // 데이터 로딩 시작
-
-  //     try {
-  //       const response = await caxios.get(`/chart/${babySeq}`, {
-  //         params: {
-  //           babyId: 1, // 실제 아기 ID로 대체
-  //           week: currentWeek,
-  //         },
-  //       });
-
-  //       const data = response.data;
-
-  //       if (!data || Object.keys(data).length === 0) {
-  //         setActualData({});
-  //         return;
-  //       }
-
-  //       setActualData(data);
-  //     } catch (error) {
-  //       if (error.response && error.response.status === 404) {
-  //         setActualData({});
-  //       } else {
-  //         console.error("데이터 조회 오류:", error);
-  //         setActualData({});
-  //       }
-  //     }
-  //   };
-
-  //   fetchCurrentData();
-  // }, [currentWeek, isFetalMode]); // currentWeek 또는 isFetalMode가 바뀔 때 실행
 
   useEffect(() => {
     if (!babyInfo) return;
@@ -131,6 +101,21 @@ const ChartIndex = () => {
 
     fetchActualData();
   }, [babyInfo, currentWeek, isFetalMode]);
+
+  useEffect(() => {
+    if (actualData && Object.keys(actualData).length > 0) {
+      // actualData의 key를 inputs key로 매핑
+      const mappedInputs = {
+        "몸무게": actualData.EFW ?? "",
+        "머리직경": actualData.OFD ?? "",
+        "머리둘레": actualData.HC ?? "",
+        "복부둘레": actualData.AC ?? "",
+        "허벅지 길이": actualData.FL ?? "",
+      };
+      setInputs(mappedInputs);
+      console.log("✅ inputs 세팅 완료:", mappedInputs);
+    }
+  }, [actualData]);
 
 
   // 로딩 상태 처리
@@ -186,6 +171,7 @@ const ChartIndex = () => {
                     actualData={actualData}
                     isFetalMode={isFetalMode} // 모드 전달
                     babyInfo={babyInfo}
+
                   />
                 )
               }
@@ -194,83 +180,21 @@ const ChartIndex = () => {
         </div>
 
         {/* 입력폼 */}
-        <ChartInput
-          menuList={currentMenuList}
-          activeMenu={activeMenu}
-          isFetalMode={isFetalMode}
-        />
+        {actualData && (
+          <ChartInput
+            menuList={currentMenuList}
+            activeMenu={activeMenu}
+            isFetalMode={isFetalMode}
+            inputs={inputs}
+            setInputs={setInputs}
+            actualData={actualData}
+            setActualData={setActualData}
+            measureTypes={measureTypes}
+          />
+        )}
       </div>
     </div>
   );
 };
 export default ChartIndex;
 
-// const ChartIndex = () => {
-//   // 2.  Hook을 호출하여 모든 상태와 데이터를 가져옵니다.
-//   const {
-//     menuList,
-//     currentWeek,
-//     activeMenu,
-//     setActiveMenu,
-//     currentStandardData,
-//     currentActualData: actualData,
-//   } = useChartIndex();
-
-//   // 3.  로딩 상태 처리
-//   if (currentWeek === 0 || actualData === null || !currentStandardData) {
-//     return <div className={styles.loading}>데이터를 계산하고 로딩 중입니다...</div>;
-//   }
-
-//   return (
-//     <div className={styles.body}>
-//       {/* 상단 버튼 영역 */}
-//       <div className={styles.menuSection}>
-//         {menuList.map((item, idx) => (
-//           <button
-//             key={idx}
-//             className={
-//               idx === activeMenu ? styles.menuActive : styles.menuButton
-//             }
-//             onClick={() => setActiveMenu(idx)} // 클릭 이벤트 추가
-//           >
-//             {item}
-//           </button>
-//         ))}
-//       </div>
-
-//       {/* 메인 컨텐츠 영역 */}
-//       <div className={styles.contentWrapper}>
-//         <div className={styles.chartRouteArea}>
-//           <Routes>
-//             {/* TotalChart와 DetailChart에 필요한 데이터를 props로 전달 */}
-//             <Route
-//               path="/" // URL은 고정됩니다.
-//               element={
-//                 //  activeMenu 값에 따라 TotalChart와 DetailChart 중 하나만 렌더링됩니다.
-//                 activeMenu === 0 ? (
-//                   <TotalChart
-//                     menuList={menuList} activeMenu={activeMenu}
-//                     currentWeek={currentWeek}
-//                     standardData={currentStandardData}
-//                     actualData={actualData}
-//                   />
-//                 ) : (
-//                   // activeMenu가 1 이상일 때 DetailChart가 렌더링됩니다.
-//                   <DetailChart menuList={menuList} activeMenu={activeMenu}
-//                     currentWeek={currentWeek}
-//                     standardData={currentStandardData}
-//                     actualData={actualData}
-//                   />
-//                 )
-//               }
-//             />
-//           </Routes>
-//         </div>
-
-//         {/* 입력폼 */}
-//         <ChartInput menuList={menuList} activeMenu={activeMenu} />
-//       </div>
-//     </div>
-//   );
-// };
-// export default ChartIndex;

@@ -8,7 +8,7 @@ const TOTAL_FETAL_DAYS = 280; // 40주 = 280일
  */
 const parseDate = (dateString) => {
     // T00:00:00Z를 붙여 UTC 기준으로 파싱하여 로컬 시간대 오차를 방지합니다.
-    return new Date(dateString + 'T00:00:00Z'); 
+    return new Date(dateString + 'T00:00:00Z');
 };
 
 /**
@@ -28,16 +28,13 @@ const getDayDifference = (dateA, dateB) => {
  * @returns {number} 계산된 임신 주차 (1 ~ 42)
  */
 export const calculateFetalWeek = (dueDateStr, measureDateStr) => {
-console.log("들어옴");
 
     const dueDate = parseDate(dueDateStr);
     const measureDate = parseDate(measureDateStr);
-    console.log("calculateFetalWeek INPUT: dueDate =", dueDateStr, ", measureDate =", measureDateStr);
     // 임신 시작일 (Conception Start) = dueDate - 40주
     const conceptionStart = new Date(dueDate.getTime() - (TOTAL_FETAL_DAYS * MS_PER_DAY));
 
-    console.log("이건 뭐지 : "+conceptionStart);
-    
+
     // 임신 시작일로부터 측정일까지 지난 일수 계산
     let daysPassed = getDayDifference(measureDate, conceptionStart);
     console.log("일수 계산일 : " + daysPassed)
@@ -45,10 +42,10 @@ console.log("들어옴");
 
     // 주차 계산: (일수 / 7) + 1
     let week = Math.floor(daysPassed / 7) + 1;
-    
+
     if (week < 1) week = 1;
     if (week > 42) week = 42;
-    
+
     return week;
 };
 
@@ -65,13 +62,13 @@ export const calculateInfantWeek = (birthDateStr, measureDateStr) => {
     const measureDate = parseDate(measureDateStr);
 
     // 출생일로부터 측정일까지 지난 일수 계산
-    let daysPassed = getDayDifference(measureDate, birthDate); 
-    
+    let daysPassed = getDayDifference(measureDate, birthDate);
+
     if (daysPassed < 0) daysPassed = 0;
 
     // 주차 계산: (일수 / 7) + 1
     let week = Math.floor(daysPassed / 7) + 1;
-    
+
     return week;
 };
 
@@ -86,16 +83,16 @@ export const calculateInfantWeek = (birthDateStr, measureDateStr) => {
  */
 export const fetalWeekStartEnd = (dueDateStr, week) => {
     const dueDate = parseDate(dueDateStr);
-    
-    // 🚨 Critical Fix 1: 계산 전 유효성 검사
+
+    //  Critical Fix 1: 계산 전 유효성 검사
     if (isNaN(dueDate.getTime())) {
         console.error("Invalid Due Date provided:", dueDateStr);
-        return [null, null]; 
+        return [null, null];
     }
 
     // 임신 시작일 (Conception Start) 밀리초
     const conceptionStartMs = dueDate.getTime() - (TOTAL_FETAL_DAYS * MS_PER_DAY);
-    
+
     // Week Start MS = Conception Start MS + (week - 1) full weeks
     const startMs = conceptionStartMs + ((week - 1) * 7 * MS_PER_DAY);
     const start = new Date(startMs); // 주차 시작일 Date 객체
@@ -104,7 +101,7 @@ export const fetalWeekStartEnd = (dueDateStr, week) => {
     const endMs = startMs + (6 * MS_PER_DAY);
     const end = new Date(endMs); // 주차 종료일 Date 객체
 
-    // 🚨 Critical Fix 2: 최종 생성된 Date 객체가 유효한지 확인
+    //  Critical Fix 2: 최종 생성된 Date 객체가 유효한지 확인
     if (isNaN(start.getTime())) {
         console.error("Calculated Start Date is Invalid for week:", week);
         return [null, null];
@@ -112,8 +109,8 @@ export const fetalWeekStartEnd = (dueDateStr, week) => {
 
     // YYYY-MM-DD 포맷으로 변환 (toISOString은 UTC 기반)
     const formatDate = (date) => date.toISOString().split('T')[0];
-    
-    return [formatDate(start), formatDate(end)]; 
+
+    return [formatDate(start), formatDate(end)];
 };
 
 
@@ -121,13 +118,13 @@ export const fetalWeekStartEnd = (dueDateStr, week) => {
 
 export const infantWeekStartEnd = (birthDateStr, week) => {
     const birthDate = parseDate(birthDateStr);
-    
+
     // 1. 유효성 검사 (태아 로직과 동일)
     if (isNaN(birthDate.getTime())) {
         console.error("Invalid Birth Date provided:", birthDateStr);
-        return [null, null]; 
+        return [null, null];
     }
-    
+
     // 생후 0주차 시작일은 birthDate입니다.
     // Week Start MS = BirthDate MS + (week - 1) full weeks
     // 예: 1주차 -> (1-1)*7 = 0일 추가. 시작일은 출생일
@@ -146,6 +143,6 @@ export const infantWeekStartEnd = (birthDateStr, week) => {
 
     // YYYY-MM-DD 포맷으로 변환 (toISOString은 UTC 기반)
     const formatDate = (date) => date.toISOString().split('T')[0];
-    
-    return [formatDate(start), formatDate(end)]; 
+
+    return [formatDate(start), formatDate(end)];
 };

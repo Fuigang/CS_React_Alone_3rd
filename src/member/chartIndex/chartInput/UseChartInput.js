@@ -1,14 +1,8 @@
 import { caxios } from "../../../config/config";
 
 // 전송 로직 분리
-export const submitChartData = async ({ inputs, date, babySeq, id }) => {
-  const measureTypes = {
-    EFW: inputs["몸무게"],
-    OFD: inputs["머리직경"],
-    HC: inputs["머리둘레"],
-    AC: inputs["복부둘레"],
-    FL: inputs["허벅지 길이"],
-  };
+export const submitChartData = async ({ inputs, date, babySeq, id, measureTypes }) => {
+
 
   // const payload = Object.entries(measureTypes)
   //   .filter(([_, value]) => value !== undefined && value !== null && value !== "")
