@@ -4,7 +4,7 @@ import useAuthStore from "../../../store/useStore";
 import { useNavigate } from "react-router-dom";
 
 function useBabyController() {
-    const { babySeq, getbabySeq, id } = useAuthStore((state) => state);
+    const { babySeq, getbabySeq, id, setBabyDueDate } = useAuthStore((state) => state);
     const [data, setData] = useState([]);
     const navigate = useNavigate();
 
@@ -34,6 +34,12 @@ function useBabyController() {
             .then(resp => {
                 getbabySeq(seq);
                 navigate("/babymypage");
+            })
+            .then(resp => {
+                caxios.get(`/baby/date?seq=${seq}`)
+                    .then(resp => {
+                        setBabyDueDate(resp.data);
+                    })
             })
             .catch(err => console.log(err));
     }

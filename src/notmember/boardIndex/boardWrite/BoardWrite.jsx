@@ -164,7 +164,7 @@ const BoardWrite = () => {
 
       {/* 에디터 영역 */}
       <div className={styles.editorArea}>
-        <SimpleEditor ref={editorRef} setInEditorUploadFiles={setInEditorUploadFiles} setEditorInstance={setEditorInstance} />
+        <SimpleEditor ref={editorRef} setInEditorUploadFiles={setInEditorUploadFiles} setEditorInstance={setEditorInstance} uploadType="board" />
       </div>
 
       {/* 액션 버튼 */}

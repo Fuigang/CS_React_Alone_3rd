@@ -158,7 +158,7 @@ const MobileToolbarContent = ({
     )}
   </>
 )
-export function SimpleEditor({ setInEditorUploadFiles, setEditorInstance }) {
+export function SimpleEditor({ setInEditorUploadFiles, setEditorInstance, uploadType }) {
   //export function SimpleEditor({ setInEditorUploadFiles }) {
   const isMobile = useIsBreakpoint()
   const { height } = useWindowSize()
@@ -210,6 +210,7 @@ export function SimpleEditor({ setInEditorUploadFiles, setEditorInstance }) {
         upload: handleImageUpload,
         onError: (error) => console.error("Upload failed:", error),
         setInEditorUploadFiles: setInEditorUploadFiles,
+        uploadType: uploadType
       }),
     ],
     content: "",
